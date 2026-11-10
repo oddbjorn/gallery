@@ -19,15 +19,21 @@
     <header class="topbar">
       <article class="caption" id="caption" aria-live="polite" aria-atomic="true"></article>
 
-      <div class="events-control">
-        <button class="events-toggle" id="events-toggle" type="button" aria-expanded="false" aria-controls="events-menu" aria-haspopup="true" aria-label="Choose an event">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-          <span class="current-event" id="current-event">Events</span>
-        </button>
-        <nav class="events-menu" id="events-menu" aria-label="Events" hidden>
-          <p class="events-menu-title">Events</p>
-          <div class="event-list" id="event-list"></div>
-        </nav>
+      <div class="topbar-right">
+        <div class="events-control">
+          <button class="events-toggle" id="events-toggle" type="button" aria-expanded="false" aria-controls="events-menu" aria-haspopup="true" aria-label="Choose an event">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            <span class="current-event" id="current-event">Events</span>
+          </button>
+          <nav class="events-menu" id="events-menu" aria-label="Events" hidden>
+            <p class="events-menu-title">Events</p>
+            <div class="event-list" id="event-list"></div>
+          </nav>
+        </div>
+
+        <aside class="bandcamp-panel" id="bandcamp-panel" aria-label="Music player" aria-hidden="true">
+          <iframe id="bandcamp-frame" width="170" height="42" style="border: 0; width: 170px; height: 42px;" seamless title="Music player" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" hidden></iframe>
+        </aside>
       </div>
     </header>
 
@@ -37,12 +43,6 @@
         <div class="artists" id="artists" role="group" aria-label="Artists in this event"></div>
       </div>
 
-      <div class="media-column">
-        <aside class="bandcamp-panel" id="bandcamp-panel" aria-label="Music player" aria-hidden="true">
-          <iframe id="bandcamp-frame" width="170" height="42" style="border: 0; width: 170px; height: 42px;" seamless title="Music player" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" hidden></iframe>
-        </aside>
-
-      </div>
     </footer>
   </div>
 

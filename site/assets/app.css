@@ -195,6 +195,19 @@ body.is-ready .ui {
   pointer-events: none;
 }
 
+.topbar-right {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 8px;
+  margin-left: auto;
+  pointer-events: auto;
+}
+
+.topbar-right .events-control {
+  margin-left: 0;
+}
+
 .events-control {
   position: relative;
   flex: 0 0 auto;
@@ -408,7 +421,9 @@ body.is-ready .ui {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: 14px;
+  gap: 0;
+  margin-left: calc(-1 * var(--gutter));
+  margin-right: calc(-1 * var(--gutter));
   pointer-events: none;
 }
 
@@ -458,6 +473,8 @@ body.is-ready .ui {
   box-shadow:
     inset 0 0 0 1px rgba(244, 239, 228, 0.08),
     0 10px 28px rgba(0, 0, 0, 0.35);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 34px, #000 calc(100% - 34px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 34px, #000 calc(100% - 34px), transparent 100%);
   pointer-events: auto;
 }
 
@@ -799,7 +816,29 @@ code {
   }
 
   .topbar {
+    align-items: flex-start;
     gap: 10px;
+    height: auto;
+  }
+
+  .topbar-right {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .topbar-right .bandcamp-panel {
+    order: 1;
+  }
+
+  .topbar-right .events-control {
+    order: 2;
+    max-width: 190px;
+  }
+
+  .artists-wrap {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
   }
 
 
