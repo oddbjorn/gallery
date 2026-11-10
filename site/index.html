@@ -19,6 +19,16 @@
     <header class="topbar">
       <article class="caption" id="caption" aria-live="polite" aria-atomic="true"></article>
 
+      <div class="events-control">
+        <button class="events-toggle" id="events-toggle" type="button" aria-expanded="false" aria-controls="events-menu" aria-haspopup="true" aria-label="Choose an event">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <span class="current-event" id="current-event">Events</span>
+        </button>
+        <nav class="events-menu" id="events-menu" aria-label="Events" hidden>
+          <p class="events-menu-title">Events</p>
+          <div class="event-list" id="event-list"></div>
+        </nav>
+      </div>
     </header>
 
     <footer class="footer">
@@ -32,16 +42,6 @@
           <iframe id="bandcamp-frame" width="170" height="42" style="border: 0; width: 170px; height: 42px;" seamless title="Music player" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" hidden></iframe>
         </aside>
 
-          <div class="events-control">
-            <button class="events-toggle" id="events-toggle" type="button" aria-expanded="false" aria-controls="events-menu" aria-haspopup="true" aria-label="Choose an event">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-              <span class="current-event" id="current-event">Events</span>
-            </button>
-            <nav class="events-menu" id="events-menu" aria-label="Events" hidden>
-              <p class="events-menu-title">Events</p>
-              <div class="event-list" id="event-list"></div>
-            </nav>
-          </div>
       </div>
     </footer>
   </div>
@@ -50,7 +50,7 @@
     <div class="intro-panel">
       <h1 id="intro-title">No events found.</h1>
       <p class="lede">
-        Add photographs under <code>events/&lt;promoter&gt;/&lt;year&gt;/&lt;artist&gt;/</code>,
+        Add photographs under <code>originals/&lt;promoter&gt;/&lt;year&gt;/&lt;artist&gt;/</code>,
         then run <code>npm run build</code> and reload this page.
       </p>
       <pre class="intro-command"><code>npm run build</code></pre>

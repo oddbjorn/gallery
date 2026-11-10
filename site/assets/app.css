@@ -189,7 +189,7 @@ body.is-ready .ui {
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   gap: 16px;
   height: 42px;
   pointer-events: none;
@@ -197,8 +197,18 @@ body.is-ready .ui {
 
 .events-control {
   position: relative;
-  width: 100%;
+  flex: 0 0 auto;
+  width: auto;
+  max-width: min(190px, 46vw);
+  margin-left: auto;
   pointer-events: auto;
+}
+
+.topbar .events-toggle {
+  width: auto;
+  padding: 6px 12px;
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  line-height: 1.1;
 }
 
 .events-toggle {
@@ -282,8 +292,8 @@ body.is-ready .ui {
 .events-menu {
   position: absolute;
   z-index: 50;
-  top: auto;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 8px);
+  bottom: auto;
   left: auto;
   right: 0;
   width: min(300px, calc(100vw - 2 * var(--gutter)));
@@ -403,11 +413,11 @@ body.is-ready .ui {
 }
 
 .caption {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-width: 0;
-  margin-left: auto;
-  max-width: min(320px, 32vw);
-  text-align: right;
+  margin: 0;
+  max-width: none;
+  text-align: left;
   text-shadow: 0 2px 36px rgba(0, 0, 0, 0.45);
 }
 
@@ -777,9 +787,6 @@ code {
    -------------------------------------------------------------------------- */
 
 @media (max-width: 860px) {
-  .caption {
-    max-width: 30vw;
-  }
 
   .caption-artist {
     font-size: clamp(1rem, 2.4vw, 1.25rem);
@@ -795,9 +802,6 @@ code {
     gap: 10px;
   }
 
-  .caption {
-    max-width: 28vw;
-  }
 
   .caption-artist {
     font-size: 1rem;
@@ -831,12 +835,6 @@ code {
   .media-column .bandcamp-panel {
     flex: 0 0 170px;
     width: 170px;
-  }
-
-  .media-column .events-control {
-    flex: 1 1 auto;
-    width: auto;
-    min-width: 0;
   }
 
   .artists {
