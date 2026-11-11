@@ -251,87 +251,20 @@ function updateStageBounds() {
 function renderEventList() {
   dom.eventList.replaceChildren()
 
-  const bestOf = bestOfCollections()
-  const hasBestOf = bestOf.length > 0
-  const bestOfCount = bestOfItems().length
+  const about = document.createElement('a')
+  about.className = 'event-item event-item-link'
+  about.href = 'about.html'
+  about.textContent = 'About'
+  dom.eventList.append(about)
 
-  if (hasBestOf) {
-    const bestOfButton = (id, label, count) => {
-      const button = document.createElement('button')
-      button.type = 'button'
-      button.className = 'event-item event-item-bestof'
-      if (id) button.classList.add('event-item-bestof-collection')
-      button.dataset.bestof = id || 'all'
-      button.setAttribute(
-        'aria-current',
-        String(state.mode === 'bestof' && (state.bestofId || null) === id)
-      )
-      button.setAttribute('aria-label', `${label}, best of, ${count} photographs`)
-
-      const name = document.createElement('span')
-      name.className = 'event-name'
-      name.textContent = label
-
-      const tally = document.createElement('span')
-      tally.className = 'event-count'
-      tally.textContent = String(count)
-
-      button.append(name, tally)
-      button.addEventListener('click', () => selectBestOf(id))
-      dom.eventList.append(button)
-    }
-
-    bestOfButton(null, 'All best of', bestOfCount)
-    for (const collection of bestOf) {
-      bestOfButton(collection.id, collection.name, collection.count)
-    }
-  }
-
-  for (const event of state.events) {
-    const active = state.mode === 'events' && event.id === state.eventId
-    const button = document.createElement('button')
-    button.type = 'button'
-    button.className = 'event-item'
-    button.dataset.event = event.id
-    button.setAttribute('aria-current', String(active))
-    button.setAttribute('aria-label', `${event.name}, ${event.count} photographs`)
-
-    const name = document.createElement('span')
-    name.className = 'event-name'
-    name.textContent = event.name
-
-    const count = document.createElement('span')
-    count.className = 'event-count'
-    count.textContent = String(event.count)
-
-    button.append(name, count)
-    button.addEventListener('click', () => selectEvent(event.id))
-    dom.eventList.append(button)
-  }
-
-  const event = currentEvent()
-  dom.currentEvent.textContent = state.mode === 'bestof'
-    ? 'Best of'
-    : (event?.name || 'Events')
-  dom.eventsToggle.hidden = state.events.length === 0 && !hasBestOf
-
+  dom.eventsToggle.hidden = false
   const eventsControl = dom.eventsToggle.closest('.events-control')
-  if (eventsControl) eventsControl.hidden = state.events.length <= 1 && !hasBestOf
+  if (eventsControl) eventsControl.hidden = false
+  dom.eventsToggle.setAttribute('aria-label', 'Open menu')
+  dom.currentEvent.textContent = 'Menu'
 
-  if (state.mode === 'bestof') {
-    const collection = currentBestOf()
-    dom.eventsToggle.setAttribute(
-      'aria-label',
-      `Choose an event or a Best-of collection. Current: ${collection?.name || 'All best of'}`
-    )
-  } else if (event) {
-    dom.eventsToggle.setAttribute(
-      'aria-label',
-      `Choose an event or open Best of. Current event: ${event.name}`
-    )
-  }
-
-  if (!state.events.length && !hasBestOf) closeEventsMenu({ restoreFocus: false })
+  const title = dom.eventsMenu.querySelector('.events-menu-title')
+  if (title) title.textContent = 'Menu'
 }
 
 function selectEvent(id) {
@@ -375,7 +308,6 @@ function selectEventGroup(group) {
 }
 
 function toggleEventsMenu() {
-  if (!state.events.length && !bestOfCollections().length) return
   if (state.menuOpen) {
     closeEventsMenu({ restoreFocus: true })
     return
