@@ -31,6 +31,8 @@ const state = {
   filter: '',
   mode: 'events',
   bestofId: null,
+  bestOfOrder: null,
+  bestOfOrderId: null,
   paused: reducedMotion,
   delay: SLIDE_DELAY,
   vegas: null,
@@ -92,7 +94,10 @@ function currentBestOf() {
 
 function bestOfItems() {
   const collections = bestOfCollections()
-  if (state.bestofId) return currentBestOf()?.items || []
+  if (state.bestofId) {
+    if (state.bestOfOrder && state.bestOfOrderId === state.bestofId) return state.bestOfOrder
+    return currentBestOf()?.items || []
+  }
 
   const seen = new Set()
   const items = []
@@ -274,6 +279,8 @@ function selectEvent(id) {
   const event = state.events.find((item) => item.id === id)
   state.mode = 'events'
   state.bestofId = null
+  state.bestOfOrder = null
+  state.bestOfOrderId = null
   state.eventGroup = null
   if (id === state.eventId && !wasBestOf && !wasGroup) return
 
@@ -294,6 +301,8 @@ function selectEventGroup(group) {
   state.mode = 'events'
   state.eventId = null
   state.bestofId = null
+  state.bestOfOrder = null
+  state.bestOfOrderId = null
   state.eventGroup = group
   state.filter = ''
   lastPreferredSrc = null
@@ -785,6 +794,9 @@ function selectBestOf(id = null) {
   state.bestofId = id
   state.eventGroup = null
   state.filter = ''
+  const collection = currentBestOf()
+  state.bestOfOrder = collection?.kind === 'artist' ? shuffle(collection.items) : null
+  state.bestOfOrderId = state.bestOfOrder ? collection.id : null
   lastPreferredSrc = null
   updateChrome()
   renderEventList()
