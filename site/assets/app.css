@@ -188,40 +188,54 @@ body.is-ready .ui {
 
 .topbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  height: 42px;
+  height: 64px;
   pointer-events: none;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 14px;
+}
+
+.topbar-left .caption {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .topbar-right {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex: none;
   gap: 8px;
   margin-left: auto;
   pointer-events: auto;
 }
 
-.topbar-right .events-control {
-  margin-left: 0;
-}
-
 .events-control {
   position: relative;
-  flex: 0 0 auto;
-  width: auto;
-  max-width: min(190px, 46vw);
-  margin-left: auto;
+  flex: none;
+  width: 42px;
+  max-width: none;
+  margin: 0;
   pointer-events: auto;
 }
 
 .topbar .events-toggle {
-  width: auto;
-  padding: 6px 12px;
-  font-size: clamp(1rem, 1.25vw, 1.2rem);
-  line-height: 1.1;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+}
+
+.current-event {
+  display: none;
 }
 
 .events-toggle {
@@ -307,8 +321,8 @@ body.is-ready .ui {
   z-index: 50;
   top: calc(100% + 8px);
   bottom: auto;
-  left: auto;
-  right: 0;
+  left: 0;
+  right: auto;
   width: min(300px, calc(100vw - 2 * var(--gutter)));
   max-height: min(60vh, 480px);
   overflow-y: auto;
@@ -441,8 +455,8 @@ body.is-ready .ui {
   overflow: hidden;
   font-family: var(--display);
   font-weight: 500;
-  font-size: clamp(1.2rem, 1.7vw, 1.65rem);
-  line-height: 1.3;
+  font-size: clamp(2.4rem, 3.4vw, 3.3rem);
+  line-height: 1.12;
   letter-spacing: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -451,7 +465,7 @@ body.is-ready .ui {
 }
 
 .caption-artist.is-unknown {
-  font-size: clamp(1rem, 1.3vw, 1.2rem);
+  font-size: clamp(2rem, 2.6vw, 2.4rem);
   font-style: italic;
   color: var(--paper-dim);
 }
@@ -796,7 +810,7 @@ code {
 @media (max-width: 860px) {
 
   .caption-artist {
-    font-size: clamp(1rem, 2.4vw, 1.25rem);
+    font-size: clamp(1.8rem, 3.4vw, 2.4rem);
   }
 }
 
@@ -811,19 +825,12 @@ code {
     height: auto;
   }
 
-  .topbar-right {
-    flex-direction: column;
-    align-items: flex-end;
+  .topbar-left {
     gap: 8px;
   }
 
-  .topbar-right .bandcamp-panel {
-    order: 1;
-  }
-
-  .topbar-right .events-control {
-    order: 2;
-    max-width: 190px;
+  .caption-artist {
+    font-size: 2rem;
   }
 
   .artists-wrap {
@@ -831,10 +838,6 @@ code {
     mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
   }
 
-
-  .caption-artist {
-    font-size: 1rem;
-  }
 
   .events-menu {
     width: calc(100vw - 2 * var(--gutter));
@@ -882,7 +885,7 @@ code {
 
 @media (max-height: 700px) and (min-width: 721px) {
   .caption-artist {
-    font-size: clamp(1rem, 1.3vw, 1.2rem);
+    font-size: clamp(2rem, 2.6vw, 2.4rem);
   }
 
   .artist-tile {
