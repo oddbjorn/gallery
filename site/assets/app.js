@@ -256,6 +256,50 @@ function updateStageBounds() {
 function renderEventList() {
   dom.eventList.replaceChildren()
 
+  for (const collection of bestOfCollections()) {
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.className = 'event-item event-item-bestof event-item-bestof-collection'
+    button.dataset.bestof = collection.id
+    const active = state.mode === 'bestof' && state.bestofId === collection.id
+    button.setAttribute('aria-current', String(active))
+    button.setAttribute('aria-label', `${collection.name}, best of, ${collection.count} photographs`)
+
+    const name = document.createElement('span')
+    name.className = 'event-name'
+    name.textContent = collection.name
+
+    const tally = document.createElement('span')
+    tally.className = 'event-count'
+    tally.textContent = String(collection.count)
+
+    button.append(name, tally)
+    button.addEventListener('click', () => selectBestOf(collection.id))
+    dom.eventList.append(button)
+  }
+
+  for (const event of state.events) {
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.className = 'event-item'
+    button.dataset.event = event.id
+    const active = state.mode === 'events' && event.id === state.eventId
+    button.setAttribute('aria-current', String(active))
+    button.setAttribute('aria-label', `${event.name}, ${event.count} photographs`)
+
+    const name = document.createElement('span')
+    name.className = 'event-name'
+    name.textContent = event.name
+
+    const count = document.createElement('span')
+    count.className = 'event-count'
+    count.textContent = String(event.count)
+
+    button.append(name, count)
+    button.addEventListener('click', () => selectEvent(event.id))
+    dom.eventList.append(button)
+  }
+
   const about = document.createElement('a')
   about.className = 'event-item event-item-link'
   about.href = 'about.html'
