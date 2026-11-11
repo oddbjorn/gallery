@@ -25,6 +25,7 @@ const state = {
   all: [],
   events: [],
   eventId: null,
+  eventGroup: null,
   view: [],
   index: 0,
   filter: '',
@@ -138,7 +139,15 @@ function normalizeEvents(collection) {
     .sort((a, b) => a.name.localeCompare(b.name))
 }
 
+function eventGroupKey(eventId) {
+  return slugify(String(eventId || '').split('/')[0])
+}
+
 function eventItems() {
+  if (state.eventGroup) {
+    const scoped = state.all.filter((item) => eventGroupKey(item.eventId) === state.eventGroup)
+    if (scoped.length) return scoped
+  }
   if (!state.eventId) return [...state.all]
   return state.all.filter((item) => item.eventId === state.eventId)
 }
@@ -149,6 +158,26 @@ function visibleItems() {
   const items = eventItems()
   if (!state.filter) return items
   return items.filter((item) => artistKey(item) === state.filter)
+}
+
+function slugify(value) {
+  return String(value ?? '')
+    .toLowerCase()
+    .replaceAll('ø', 'o')
+    .replaceAll('æ', 'ae')
+    .replaceAll('å', 'a')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function replaceRoute(path) {
+  try {
+    history.replaceState(null, '', `${path}${location.search}${location.hash}`)
+  } catch {
+    /* file:// and some embeds disallow history updates */
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -189,6 +218,7 @@ async function boot() {
 
     document.body.classList.add('is-ready')
     mount()
+    applyRouteFromPath()
   } catch (error) {
     console.warn('[gallery]', error.message)
     dom.intro.hidden = false
@@ -307,9 +337,12 @@ function renderEventList() {
 function selectEvent(id) {
   closeEventsMenu({ restoreFocus: true })
   const wasBestOf = state.mode === 'bestof'
+  const wasGroup = Boolean(state.eventGroup)
+  const event = state.events.find((item) => item.id === id)
   state.mode = 'events'
   state.bestofId = null
-  if (id === state.eventId && !wasBestOf) return
+  state.eventGroup = null
+  if (id === state.eventId && !wasBestOf && !wasGroup) return
 
   state.eventId = id
   state.filter = ''
@@ -320,6 +353,25 @@ function selectEvent(id) {
   updateChrome()
   syncBandcamp()
   buildSlideshow({ index: 0 })
+  if (event) replaceRoute(`/${slugify(event.name)}/`)
+}
+
+function selectEventGroup(group) {
+  closeEventsMenu({ restoreFocus: true })
+  state.mode = 'events'
+  state.eventId = null
+  state.bestofId = null
+  state.eventGroup = group
+  state.filter = ''
+  lastPreferredSrc = null
+
+  renderEventList()
+  buildArtistTiles()
+  updateChrome()
+  syncBandcamp()
+  buildSlideshow({ index: 0 })
+  dom.eventsToggle.setAttribute('aria-label', `Choose an event or Best-of. Current group: ${group}`)
+  replaceRoute(`/${group}/`)
 }
 
 function toggleEventsMenu() {
@@ -792,11 +844,14 @@ function showAllArtists() {
 
 function selectBestOf(id = null) {
   closeEventsMenu({ restoreFocus: true })
-  if (!bestOfCollections().length) return
-  if (id !== null && !bestOfCollections().some((collection) => collection.id === id)) return
+  const collections = bestOfCollections()
+  if (!collections.length) return
+  const selected = id === null ? null : collections.find((collection) => collection.id === id)
+  if (id !== null && !selected) return
 
   state.mode = 'bestof'
   state.bestofId = id
+  state.eventGroup = null
   state.filter = ''
   lastPreferredSrc = null
   updateChrome()
@@ -804,6 +859,34 @@ function selectBestOf(id = null) {
   renderBestofStrip()
   syncBandcamp()
   buildSlideshow({ index: 0 })
+  replaceRoute(selected ? `/${slugify(selected.name)}/` : '/best-of/')
+}
+
+function applyRouteFromPath() {
+  const segment = location.pathname.split('/').filter(Boolean)[0] || ''
+  const slug = slugify(decodeURIComponent(segment).replace(/\.html$/i, ''))
+  if (!slug || slug === 'index') return
+
+  const collections = bestOfCollections()
+  if (slug === 'best-of' && collections.length) {
+    selectBestOf(null)
+    return
+  }
+
+  const bestOf = collections.find((collection) => slugify(collection.name) === slug)
+  if (bestOf) {
+    selectBestOf(bestOf.id)
+    return
+  }
+
+  const event = state.events.find((item) => slugify(item.name) === slug)
+  if (event) {
+    selectEvent(event.id)
+    return
+  }
+
+  const groups = [...new Set(state.events.map((item) => eventGroupKey(item.id)).filter(Boolean))]
+  if (groups.includes(slug)) selectEventGroup(slug)
 }
 
 /* --------------------------------------------------------------------------
