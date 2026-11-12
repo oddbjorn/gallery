@@ -65,6 +65,12 @@
     "Flutter Rider (Espen Friberg og Jenny Berger Myhre)": {
       "embed": "https://bandcamp.com/EmbeddedPlayer/album=1126771960/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
       "height": 42
+    },
+    "Slomosa": {
+      "embed": "https://bandcamp.com/EmbeddedPlayer/track=3222137599/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
+      "height": 42,
+      "page": "https://slomosa1.bandcamp.com/track/red-thundra-2",
+      "homepage": "https://slomosa1.bandcamp.com/"
     }
   }
 }

@@ -17,7 +17,7 @@ import { slugify } from './slug.js'
 const SITE_TITLE = 'Oddbjørn Steffensen Concert Photography'
 const BUILD_VERSION = document.querySelector('meta[name="gallery-version"]')?.content || ''
 const versioned = (url) => BUILD_VERSION ? `${url}?v=${encodeURIComponent(BUILD_VERSION)}` : url
-const SLIDE_DELAY = 7200
+const SLIDE_DELAY = 5000
 const TRANSITION_DURATION = 1500
 const ARROW_TRANSITION_DURATION = 450
 const TRANSITIONS = ['fade', 'fade', 'fade2', 'blur']
@@ -44,6 +44,7 @@ const state = {
   bandcamp: {},
   bandcampOpen: false,
   bandcampArtist: null,
+  bandcampLoadedArtist: null,
   menuOpen: false,
   elapsed: 0,
   startedAt: 0,
@@ -185,7 +186,6 @@ async function boot() {
   bindEvents()
 
   try {
-    const configPromise = loadRuntimeConfig()
     const response = await fetch(versioned('data/gallery.json'), { cache: 'no-cache' })
     if (!response.ok) throw new Error(`data/gallery.json responded ${response.status}`)
 
@@ -210,7 +210,9 @@ async function boot() {
     state.events = normalizeEvents(collection)
     state.eventId = state.events[0]?.id || null
 
-    const config = await configPromise
+    const config = collection.bandcamp
+      ? { bandcamp: collection.bandcamp }
+      : await loadRuntimeConfig()
     state.bandcamp = normalizeBandcamp(config.bandcamp)
 
     document.body.classList.add('is-ready')
@@ -678,11 +680,41 @@ function renderBestofStrip() {
   updateArtistStrip()
 }
 
+function cancelStripCenter() {
+  if (!stripCenterFrame) return
+  cancelAnimationFrame(stripCenterFrame)
+  stripCenterFrame = 0
+}
+
 function centerStripButton(button) {
-  if (!button) return
+  if (!button || dom.artists.classList.contains('is-dragging')) return
+
   const max = Math.max(0, dom.artists.scrollWidth - dom.artists.clientWidth)
   const left = button.offsetLeft - (dom.artists.clientWidth - button.clientWidth) / 2
-  dom.artists.scrollTo({ left: Math.min(max, Math.max(0, left)), behavior: 'auto' })
+  const target = Math.min(max, Math.max(0, left))
+  const start = dom.artists.scrollLeft
+
+  cancelStripCenter()
+  if (Math.abs(target - start) < 1) return
+
+  if (reducedMotion) {
+    dom.artists.scrollLeft = target
+    return
+  }
+
+  const duration = 420
+  const startedAt = performance.now()
+
+  const stepCenter = (now) => {
+    const t = Math.min(1, (now - startedAt) / duration)
+    const eased = 1 - Math.pow(1 - t, 3)
+    dom.artists.scrollLeft = Math.min(max, Math.max(0, start + (target - start) * eased))
+
+    if (t < 1) stripCenterFrame = requestAnimationFrame(stepCenter)
+    else stripCenterFrame = 0
+  }
+
+  stripCenterFrame = requestAnimationFrame(stepCenter)
 }
 
 function syncBestofStripActive() {
@@ -797,6 +829,8 @@ function renderArtistStrip() {
 
     button.append(frame)
     appendTileLabel(button, tile.name, count)
+    button.addEventListener('pointerenter', () => prefetchBandcamp(tile.name))
+    button.addEventListener('focus', () => prefetchBandcamp(tile.name))
     button.addEventListener('click', () => toggleArtist(tile))
     dom.artists.append(button)
   }
@@ -938,8 +972,8 @@ function setFilter(name, startSrc = null) {
   state.filter = name
   lastPreferredSrc = startSrc || (name ? null : currentSrc)
   updateChrome()
-  buildSlideshow()
   syncBandcamp()
+  buildSlideshow()
 }
 
 /* --------------------------------------------------------------------------
@@ -1004,6 +1038,14 @@ function safeUrl(value) {
   }
 }
 
+function prefetchBandcamp(artist) {
+  if (state.bandcampOpen) return
+  const entry = state.bandcamp[artist]
+  if (!entry || state.bandcampLoadedArtist === artist) return
+  dom.bandcampFrame.src = entry.embed
+  state.bandcampLoadedArtist = artist
+}
+
 function syncBandcamp() {
   const artist = state.mode === 'bestof' ? bestOfArtist() : state.filter
   const entry = artist ? state.bandcamp[artist] : null
@@ -1019,7 +1061,10 @@ function syncBandcamp() {
   dom.bandcampPanel.setAttribute('aria-hidden', 'false')
   dom.bandcampPanel.setAttribute('aria-label', `${entry.label} player for ${artist}`)
   dom.bandcampFrame.title = `${entry.label} player for ${artist}`
-  dom.bandcampFrame.src = entry.embed
+  if (state.bandcampLoadedArtist !== artist) {
+    dom.bandcampFrame.src = entry.embed
+    state.bandcampLoadedArtist = artist
+  }
   dom.bandcampFrame.hidden = false
 }
 
@@ -1029,6 +1074,7 @@ function hideBandcamp() {
   }
   state.bandcampOpen = false
   state.bandcampArtist = null
+  state.bandcampLoadedArtist = null
   dom.bandcampFrame.hidden = true
   dom.bandcampPanel.setAttribute('aria-hidden', 'true')
   dom.bandcampPanel.setAttribute('aria-label', 'Music player')
@@ -1058,6 +1104,7 @@ let swipe = null
 let resumeOnVisible = false
 let suppressStripClick = false
 let stripGlideFrame = 0
+let stripCenterFrame = 0
 
 function bindEvents() {
   dom.eventsToggle.addEventListener('click', toggleEventsMenu)
@@ -1093,6 +1140,8 @@ function bindEvents() {
   }
 
   // Drag the artist filmstrip with a mouse (touch already scrolls natively).
+  dom.artists.addEventListener('wheel', cancelStripCenter, { passive: true })
+
   dom.artists.addEventListener('click', (event) => {
     if (!suppressStripClick) return
     suppressStripClick = false
@@ -1101,6 +1150,7 @@ function bindEvents() {
   }, true)
 
   dom.artists.addEventListener('pointerdown', (event) => {
+    cancelStripCenter()
     if (event.pointerType !== 'mouse' || event.button !== 0) return
     if (dom.artists.scrollWidth <= dom.artists.clientWidth + 1) return
 
@@ -1282,6 +1332,7 @@ function bindEvents() {
 }
 
 function startStripGlide(initialVelocity) {
+  cancelStripCenter()
   cancelAnimationFrame(stripGlideFrame)
 
   let velocity = initialVelocity
