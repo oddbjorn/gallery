@@ -2,7 +2,7 @@
  * Best-of collection helpers — browser and Node safe.
  */
 
-export const BEST_OF_KINDS = new Set(['artist', 'event', 'mixed'])
+export const BEST_OF_KINDS = new Set(['artist', 'event', 'mixed', 'portfolio'])
 
 /** Drop malformed collections/items and make counts authoritative. */
 export function normalizeBestOf(raw) {

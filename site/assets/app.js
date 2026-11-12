@@ -216,8 +216,9 @@ async function boot() {
     state.bandcamp = normalizeBandcamp(config.bandcamp)
 
     document.body.classList.add('is-ready')
-    mount()
-    applyRouteFromPath()
+    document.title = SITE_TITLE
+    if (applyRouteFromPath()) requestAnimationFrame(updateStageBounds)
+    else mount()
   } catch (error) {
     console.warn('[gallery]', error.message)
     dom.intro.hidden = false
@@ -250,7 +251,13 @@ function updateStageBounds() {
 function renderEventList() {
   dom.eventList.replaceChildren()
 
-  for (const collection of bestOfCollections()) {
+  const menuCollections = [...bestOfCollections()].sort((a, b) => {
+    if (a.kind === 'portfolio') return -1
+    if (b.kind === 'portfolio') return 1
+    return 0
+  })
+
+  for (const collection of menuCollections) {
     const button = document.createElement('button')
     button.type = 'button'
     button.className = 'event-item event-item-bestof event-item-bestof-collection'
@@ -294,15 +301,6 @@ function renderEventList() {
     dom.eventList.append(button)
   }
 
-  const about = document.createElement('a')
-  about.className = 'event-item event-item-link'
-  about.href = 'about.html'
-  const aboutName = document.createElement('span')
-  aboutName.className = 'event-name'
-  aboutName.textContent = 'About'
-  about.append(aboutName)
-  dom.eventList.append(about)
-
   dom.eventsToggle.hidden = false
   const eventsControl = dom.eventsToggle.closest('.events-control')
   if (eventsControl) eventsControl.hidden = false
@@ -321,7 +319,7 @@ function selectEvent(id) {
   state.bestOfOrder = null
   state.bestOfOrderId = null
   state.eventGroup = null
-  if (id === state.eventId && !wasBestOf && !wasGroup) return
+  if (id === state.eventId && !wasBestOf && !wasGroup && state.vegas) return
 
   state.eventId = id
   state.filter = ''
@@ -901,7 +899,7 @@ function showAllArtists() {
   syncBandcamp()
 }
 
-function selectBestOf(id = null) {
+function selectBestOf(id = null, { updateRoute = true } = {}) {
   closeEventsMenu({ restoreFocus: true })
   const collections = bestOfCollections()
   if (!collections.length) return
@@ -913,7 +911,9 @@ function selectBestOf(id = null) {
   state.eventGroup = null
   state.filter = ''
   const collection = currentBestOf()
-  state.bestOfOrder = collection?.kind === 'artist' ? shuffle(collection.items) : null
+  state.bestOfOrder = ['artist', 'portfolio'].includes(collection?.kind)
+    ? shuffle(collection.items)
+    : null
   state.bestOfOrderId = state.bestOfOrder ? collection.id : null
   lastPreferredSrc = null
   updateChrome()
@@ -921,24 +921,31 @@ function selectBestOf(id = null) {
   renderBestofStrip()
   syncBandcamp()
   buildSlideshow({ index: 0 })
-  replaceRoute(selected ? `/${slugify(selected.name)}/` : '/best-of/')
+  if (updateRoute) replaceRoute(selected ? `/${slugify(selected.name)}/` : '/best-of/')
+}
+
+function selectDefaultPortfolio() {
+  const portfolio = bestOfCollections().find((collection) => collection.kind === 'portfolio')
+  if (!portfolio) return false
+  selectBestOf(portfolio.id, { updateRoute: false })
+  return true
 }
 
 function applyRouteFromPath() {
   const segment = location.pathname.split('/').filter(Boolean)[0] || ''
   const slug = slugify(decodeURIComponent(segment).replace(/\.html$/i, ''))
-  if (!slug || slug === 'index') return
+  if (!slug || slug === 'index') return selectDefaultPortfolio()
 
   const collections = bestOfCollections()
   if (slug === 'best-of' && collections.length) {
     selectBestOf(null)
-    return
+    return true
   }
 
   const bestOf = collections.find((collection) => slugify(collection.name) === slug)
   if (bestOf) {
     selectBestOf(bestOf.id)
-    return
+    return true
   }
 
   const event = state.events.find((item) => {
@@ -947,11 +954,16 @@ function applyRouteFromPath() {
   })
   if (event) {
     selectEvent(event.id)
-    return
+    return true
   }
 
   const groups = [...new Set(state.events.map((item) => eventGroupKey(item.id)).filter(Boolean))]
-  if (groups.includes(slug)) selectEventGroup(slug)
+  if (groups.includes(slug)) {
+    selectEventGroup(slug)
+    return true
+  }
+
+  return selectDefaultPortfolio()
 }
 
 /* --------------------------------------------------------------------------
