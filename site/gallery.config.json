@@ -36,10 +36,6 @@
       "embed": "https://bandcamp.com/EmbeddedPlayer/track=2529912623/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
       "height": 42
     },
-    "Camen Villain": {
-      "embed": "https://bandcamp.com/EmbeddedPlayer/album=437885375/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
-      "height": 42
-    },
     "Daisuke Sato": {
       "embed": "https://bandcamp.com/EmbeddedPlayer/track=1192194939/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
       "height": 42
@@ -56,14 +52,19 @@
       "embed": "https://bandcamp.com/EmbeddedPlayer/album=318238716/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
       "height": 42
     },
-    "Flutter Rider Espen Friberg og Jenny Berger Myhre": {
-      "embed": "https://bandcamp.com/EmbeddedPlayer/album=1126771960/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
-      "height": 42
-    },
     "Seigmen": {
       "embed": "https://bandcamp.com/EmbeddedPlayer/album=2981955443/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
       "height": 42,
-      "page": "https://seigmen.bandcamp.com/album/dissonans"
+      "page": "https://seigmen.bandcamp.com/album/dissonans",
+      "homepage": "https://seigmen.bandcamp.com/"
+    },
+    "Carmen Villain": {
+      "embed": "https://bandcamp.com/EmbeddedPlayer/album=437885375/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
+      "height": 42
+    },
+    "Flutter Rider (Espen Friberg og Jenny Berger Myhre)": {
+      "embed": "https://bandcamp.com/EmbeddedPlayer/album=1126771960/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
+      "height": 42
     }
   }
 }

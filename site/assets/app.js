@@ -8,14 +8,18 @@
 
 import vegas from '../vendor/vegas/vegas.js'
 import { normalizeBestOf } from './best-of.js'
+import { slugify } from './slug.js'
 
 /* --------------------------------------------------------------------------
    Config + state
    -------------------------------------------------------------------------- */
 
 const SITE_TITLE = 'Oddbjørn Steffensen Concert Photography'
+const BUILD_VERSION = document.querySelector('meta[name="gallery-version"]')?.content || ''
+const versioned = (url) => BUILD_VERSION ? `${url}?v=${encodeURIComponent(BUILD_VERSION)}` : url
 const SLIDE_DELAY = 7200
 const TRANSITION_DURATION = 1500
+const ARROW_TRANSITION_DURATION = 450
 const TRANSITIONS = ['fade', 'fade', 'fade2', 'blur']
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -165,18 +169,6 @@ function visibleItems() {
   return items.filter((item) => artistKey(item) === state.filter)
 }
 
-function slugify(value) {
-  return String(value ?? '')
-    .toLowerCase()
-    .replaceAll('ø', 'o')
-    .replaceAll('æ', 'ae')
-    .replaceAll('å', 'a')
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
 function replaceRoute(path) {
   try {
     history.replaceState(null, '', `${path}${location.search}${location.hash}`)
@@ -194,7 +186,7 @@ async function boot() {
 
   try {
     const configPromise = loadRuntimeConfig()
-    const response = await fetch('data/gallery.json', { cache: 'no-cache' })
+    const response = await fetch(versioned('data/gallery.json'), { cache: 'no-cache' })
     if (!response.ok) throw new Error(`data/gallery.json responded ${response.status}`)
 
     const collection = await response.json()
@@ -303,7 +295,10 @@ function renderEventList() {
   const about = document.createElement('a')
   about.className = 'event-item event-item-link'
   about.href = 'about.html'
-  about.textContent = 'About'
+  const aboutName = document.createElement('span')
+  aboutName.className = 'event-name'
+  aboutName.textContent = 'About'
+  about.append(aboutName)
   dom.eventList.append(about)
 
   dom.eventsToggle.hidden = false
@@ -312,8 +307,6 @@ function renderEventList() {
   dom.eventsToggle.setAttribute('aria-label', 'Open menu')
   dom.currentEvent.textContent = 'Menu'
 
-  const title = dom.eventsMenu.querySelector('.events-menu-title')
-  if (title) title.textContent = 'Menu'
 }
 
 function selectEvent(id) {
@@ -473,11 +466,21 @@ function prefetch(index) {
   }
 }
 
-function step(delta) {
+function step(delta, { fast = false } = {}) {
   if (!state.vegas || state.view.length < 2) return
   clearTimer()
-  if (delta > 0) state.vegas.next()
-  else state.vegas.previous()
+
+  const previousDuration = state.vegas.settings.transitionDuration
+  if (fast) {
+    state.vegas.settings.transitionDuration = reducedMotion ? 140 : ARROW_TRANSITION_DURATION
+  }
+
+  try {
+    if (delta > 0) state.vegas.next()
+    else state.vegas.previous()
+  } finally {
+    if (fast) state.vegas.settings.transitionDuration = previousDuration
+  }
 }
 
 function goTo(index) {
@@ -545,11 +548,18 @@ let captionEls = null
 function ensureCaption() {
   if (captionEls) return captionEls
 
-  const artist = document.createElement('h1')
+  const artist = document.createElement('h2')
   artist.className = 'caption-artist'
 
-  dom.caption.append(artist)
-  captionEls = { artist }
+  const link = document.createElement('a')
+  link.className = 'caption-link'
+  artist.append(link)
+
+  const context = document.createElement('span')
+  context.className = 'caption-context visually-hidden'
+
+  dom.caption.append(artist, context)
+  captionEls = { artist, link, context }
   return captionEls
 }
 
@@ -563,8 +573,36 @@ function renderCaption() {
 
   const els = ensureCaption()
 
+  const name = item.artist || 'Unknown artist'
   els.artist.classList.toggle('is-unknown', !item.artist)
-  setText(els.artist, item.artist || 'Unknown artist')
+  setText(els.link, name)
+
+  const entry = state.bandcamp[item.artist]
+  if (entry?.homepage) {
+    els.link.href = entry.homepage
+    els.link.target = '_blank'
+    els.link.rel = 'noreferrer noopener'
+    els.link.title = `Open ${name} on Bandcamp`
+    els.link.classList.add('has-homepage')
+  } else {
+    els.link.removeAttribute('href')
+    els.link.removeAttribute('target')
+    els.link.removeAttribute('rel')
+    els.link.removeAttribute('title')
+    els.link.classList.remove('has-homepage')
+  }
+
+  const collection = currentBestOf()
+  const context = [
+    item.artist || 'Unknown artist'
+  ]
+  const place = state.mode === 'bestof'
+    ? collection?.name
+    : (item.eventName || currentEvent()?.name)
+  if (place && place !== item.artist) context.push(`at ${place}`)
+  if (item.date) context.push(item.date)
+  context.push(`photograph ${state.index + 1} of ${state.view.length}`)
+  setText(els.context, context.join('. '))
 }
 
 /* --------------------------------------------------------------------------
@@ -640,6 +678,13 @@ function renderBestofStrip() {
   updateArtistStrip()
 }
 
+function centerStripButton(button) {
+  if (!button) return
+  const max = Math.max(0, dom.artists.scrollWidth - dom.artists.clientWidth)
+  const left = button.offsetLeft - (dom.artists.clientWidth - button.clientWidth) / 2
+  dom.artists.scrollTo({ left: Math.min(max, Math.max(0, left)), behavior: 'auto' })
+}
+
 function syncBestofStripActive() {
   if (state.mode !== 'bestof') return
 
@@ -654,6 +699,7 @@ function syncBestofStripActive() {
         ? `Show photograph ${index + 1} of ${state.view.length}: ${item.artist || 'Unknown artist'}`
         : 'Best-of photograph'
     )
+    if (active) centerStripButton(button)
   }
 }
 
@@ -775,10 +821,7 @@ function updateArtistStrip() {
           : 'Best-of photograph'
       )
 
-      if (active) {
-        const left = button.offsetLeft - (dom.artists.clientWidth - button.clientWidth) / 2
-        dom.artists.scrollTo({ left: Math.max(0, left), behavior: 'auto' })
-      }
+      if (active) centerStripButton(button)
       continue
     }
 
@@ -807,10 +850,7 @@ function updateArtistStrip() {
       )
     }
 
-    if (active) {
-      const left = button.offsetLeft - (dom.artists.clientWidth - button.clientWidth) / 2
-      dom.artists.scrollTo({ left: Math.max(0, left), behavior: 'auto' })
-    }
+    if (active) centerStripButton(button)
   }
 }
 
@@ -867,7 +907,10 @@ function applyRouteFromPath() {
     return
   }
 
-  const event = state.events.find((item) => slugify(item.name) === slug)
+  const event = state.events.find((item) => {
+    const eventSlug = slugify(item.name)
+    return eventSlug === slug || eventSlug.replaceAll('-', '') === slug.replaceAll('-', '')
+  })
   if (event) {
     selectEvent(event.id)
     return
@@ -905,7 +948,7 @@ function setFilter(name, startSrc = null) {
 
 async function loadRuntimeConfig() {
   try {
-    const response = await fetch('gallery.config.json', { cache: 'no-cache' })
+    const response = await fetch(versioned('gallery.config.json'), { cache: 'no-cache' })
     if (!response.ok) return {}
     return await response.json()
   } catch {
@@ -946,7 +989,8 @@ function normalizeBandcampEntry(raw) {
     embed,
     height: Number.isFinite(height) && height >= 42 ? height : 42,
     label,
-    page: safeUrl(data.page)
+    page: safeUrl(data.page),
+    homepage: safeUrl(data.homepage)
   }
 }
 
@@ -1047,27 +1091,6 @@ function bindEvents() {
   if ('ResizeObserver' in window) {
     new ResizeObserver(updateStageBounds).observe(dom.footer)
   }
-
-  // Arrow keys stay inside the filmstrip instead of changing slides.
-  dom.artists.addEventListener('keydown', (event) => {
-    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
-
-    const buttons = [...dom.artists.querySelectorAll('.artist-tile')]
-    const current = buttons.indexOf(document.activeElement)
-    if (current < 0) return
-
-    event.preventDefault()
-    event.stopPropagation()
-
-    let next = current
-    if (event.key === 'ArrowLeft') next = Math.max(0, current - 1)
-    else if (event.key === 'ArrowRight') next = Math.min(buttons.length - 1, current + 1)
-    else if (event.key === 'Home') next = 0
-    else if (event.key === 'End') next = buttons.length - 1
-
-    buttons[next].focus({ preventScroll: true })
-    buttons[next].scrollIntoView({ block: 'nearest', inline: 'center' })
-  })
 
   // Drag the artist filmstrip with a mouse (touch already scrolls natively).
   dom.artists.addEventListener('click', (event) => {
@@ -1184,11 +1207,11 @@ function bindEvents() {
     switch (event.key) {
       case 'ArrowRight':
         event.preventDefault()
-        step(1)
+        step(1, { fast: true })
         break
       case 'ArrowLeft':
         event.preventDefault()
-        step(-1)
+        step(-1, { fast: true })
         break
       case ' ':
       case 'Spacebar':

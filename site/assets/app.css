@@ -337,15 +337,6 @@ body.is-ready .ui {
   -webkit-backdrop-filter: blur(24px);
 }
 
-.events-menu-title {
-  margin: 0 0 8px;
-  font-family: var(--mono);
-  font-size: 8px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--paper-faint);
-}
-
 .event-list {
   display: flex;
   flex-direction: column;
@@ -470,6 +461,18 @@ body.is-ready .ui {
   white-space: nowrap;
   max-width: 100%;
   padding-bottom: 1px;
+}
+
+.caption-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.caption-link.has-homepage:hover,
+.caption-link.has-homepage:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .caption-artist.is-unknown {
@@ -693,7 +696,7 @@ body.is-ready .ui {
 
 .bandcamp-panel {
   flex: none;
-  width: 170px;
+  width: 85px;
   height: 42px;
   line-height: 0;
   pointer-events: auto;
@@ -701,7 +704,7 @@ body.is-ready .ui {
 
 .bandcamp-panel iframe {
   display: block;
-  width: 170px;
+  width: 85px;
   height: 42px;
   border: 0;
   background: #333333;
@@ -1050,4 +1053,21 @@ code {
 .about-panel a:hover {
   border-color: var(--accent);
   color: var(--accent);
+}
+
+
+/* --------------------------------------------------------------------------
+   Accessibility helpers
+   -------------------------------------------------------------------------- */
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
