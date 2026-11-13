@@ -325,7 +325,7 @@ function selectEvent(id) {
   state.bestOfOrder = null
   state.bestOfOrderId = null
   state.eventGroup = null
-  if (id === state.eventId && !wasBestOf && !wasGroup && state.vegas) return
+  if (id === state.eventId && !wasBestOf && !wasGroup && !state.filter && state.vegas) return
 
   state.eventId = id
   state.filter = ''
