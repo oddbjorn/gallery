@@ -285,26 +285,54 @@ function renderEventList() {
     dom.eventList.append(button)
   }
 
+  const eventGroups = new Map()
   for (const event of state.events) {
-    const button = document.createElement('button')
-    button.type = 'button'
-    button.className = 'event-item'
-    button.dataset.event = event.id
-    const active = state.mode === 'events' && event.id === state.eventId
-    button.setAttribute('aria-current', String(active))
-    button.setAttribute('aria-label', `${event.name}, ${event.count} photographs`)
+    const key = String(event.id || '').split('/')[0] || event.name
+    if (!eventGroups.has(key)) eventGroups.set(key, [])
+    eventGroups.get(key).push(event)
+  }
 
-    const name = document.createElement('span')
-    name.className = 'event-name'
-    name.textContent = event.name
+  for (const [key, events] of eventGroups) {
+    const groupSlug = slugify(key)
+    const group = document.createElement('div')
+    group.className = 'event-group'
+    if (state.mode === 'events' && state.eventGroup === groupSlug) group.classList.add('is-group-active')
 
-    const count = document.createElement('span')
-    count.className = 'event-count'
-    count.textContent = String(event.count)
+    const total = events.reduce((sum, event) => sum + event.count, 0)
+    const main = document.createElement('button')
+    main.type = 'button'
+    main.className = 'event-group-name event-name'
+    main.textContent = key
+    main.setAttribute('aria-current', String(state.mode === 'events' && state.eventGroup === groupSlug))
+    main.setAttribute('aria-label', `${key}, all years, ${total} photographs`)
+    main.addEventListener('click', () => selectEventGroup(groupSlug))
 
-    button.append(name, count)
-    button.addEventListener('click', () => selectEvent(event.id))
-    dom.eventList.append(button)
+    const years = document.createElement('div')
+    years.className = 'event-years'
+    const ordered = [...events].sort((a, b) => {
+      const ay = Number((/\b(19|20)\d{2}\b/.exec(a.name) || [])[0]) || 0
+      const by = Number((/\b(19|20)\d{2}\b/.exec(b.name) || [])[0]) || 0
+      return by - ay
+    })
+
+    for (const event of ordered) {
+      const year = (event.name.match(/\b(19|20)\d{2}\b/) || [])[0]
+        || event.name.replace(key, '').trim()
+        || event.name
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.className = 'event-year'
+      button.dataset.event = event.id
+      const active = state.mode === 'events' && event.id === state.eventId
+      button.setAttribute('aria-current', String(active))
+      button.setAttribute('aria-label', `${event.name}, ${event.count} photographs`)
+      button.textContent = year
+      button.addEventListener('click', () => selectEvent(event.id))
+      years.append(button)
+    }
+
+    group.append(main, years)
+    dom.eventList.append(group)
   }
 
   dom.eventsToggle.hidden = false

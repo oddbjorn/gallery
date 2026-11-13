@@ -71,6 +71,35 @@
       "height": 42,
       "page": "https://slomosa1.bandcamp.com/track/red-thundra-2",
       "homepage": "https://slomosa1.bandcamp.com/"
+    },
+    "Astrid Sonne": {
+      "embed": "https://bandcamp.com/EmbeddedPlayer/track=1242037448/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
+      "height": 42,
+      "page": "https://astridsonne.bandcamp.com/track/do-you-wanna",
+      "homepage": "https://astridsonne.bandcamp.com/"
+    },
+    "Iceboy Violet & Nueen": {
+      "embed": "https://bandcamp.com/EmbeddedPlayer/track=3912597433/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
+      "height": 42,
+      "page": "https://iceboyviolet.bandcamp.com/track/closer",
+      "homepage": "https://iceboyviolet.bandcamp.com/"
+    },
+    "Petra Hermanova": {
+      "embed": "https://bandcamp.com/EmbeddedPlayer/track=622879757/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
+      "height": 42,
+      "page": "https://petrahermanova.bandcamp.com/track/black-glass",
+      "homepage": "https://petrahermanova.bandcamp.com/"
+    },
+    "Ismistik": {
+      "embed": "https://bandcamp.com/EmbeddedPlayer/album=2636204346/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
+      "height": 42,
+      "page": "https://hmdrecords.bandcamp.com/album/live-borgen-1994"
+    },
+    "Rival Consoles": {
+      "embed": "https://bandcamp.com/EmbeddedPlayer/track=2463737777/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
+      "height": 42,
+      "page": "https://rivalconsoles.bandcamp.com/track/if-not-now",
+      "homepage": "https://rivalconsoles.bandcamp.com/"
     }
   }
 }

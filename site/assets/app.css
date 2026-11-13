@@ -450,6 +450,57 @@ body.is-ready .ui {
   white-space: nowrap;
 }
 
+.event-group {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(244, 239, 228, 0.07);
+  color: #fff;
+}
+
+.event-group:last-child {
+  border-bottom: 0;
+}
+
+.event-group-name {
+  flex: 1 1 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.event-group-name[aria-current="true"] {
+  color: var(--accent);
+}
+
+.event-years {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex: none;
+}
+
+.event-year {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.event-year:hover,
+.event-year[aria-current="true"] {
+  color: var(--accent);
+}
+
 .event-item[aria-current="true"] {
   color: var(--accent);
 }
@@ -1141,4 +1192,80 @@ code {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+
+/* --------------------------------------------------------------------------
+   About artist index
+   -------------------------------------------------------------------------- */
+
+.artist-index-section {
+  margin-top: 46px;
+}
+
+.artist-index-section h2 {
+  margin: 0 0 8px;
+  font-family: var(--display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.artist-index {
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.artist-index-item {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(244, 239, 228, 0.07);
+}
+
+.artist-index-name {
+  font-family: var(--display);
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.artist-index-count {
+  color: var(--paper-faint);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
+.artist-index-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-left: auto;
+}
+
+.artist-index-links a {
+  color: var(--paper-dim);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+
+.artist-index-links a:hover,
+.artist-index-links a:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+@media (max-width: 720px) {
+  .artist-index-links {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
 }
