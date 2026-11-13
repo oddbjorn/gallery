@@ -75,6 +75,12 @@ function artistKey(item) {
   return item.artist || 'Unattributed'
 }
 
+function slideSource(item) {
+  if (!item?.srcMedium) return item?.src || ''
+  const targetPixels = Math.round((window.innerWidth || 0) * Math.min(window.devicePixelRatio || 1, 2))
+  return targetPixels <= 1300 ? item.srcMedium : item.src
+}
+
 function shuffle(list) {
   const copy = [...list]
   for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -420,7 +426,7 @@ function buildSlideshow({ index = 0, src = null } = {}) {
 
   state.vegas = vegas(dom.stage, {
     slides: items.map((item, i) => ({
-      src: item.src,
+      src: slideSource(item),
       transition: TRANSITIONS[i % TRANSITIONS.length]
     })),
     slide: state.index,
@@ -462,7 +468,7 @@ function prefetch(index) {
     if (!item) continue
     const image = new Image()
     image.decoding = 'async'
-    image.src = item.src
+    image.src = slideSource(item)
   }
 }
 
@@ -808,9 +814,9 @@ function renderArtistStrip() {
 
   for (const tile of state.artistTiles) {
     const count = tile.items.length
-    const button = document.createElement('button')
-    button.type = 'button'
+    const button = document.createElement('a')
     button.className = 'artist-tile'
+    button.href = artistHref(tile.name)
     button.dataset.artist = tile.name
     button.title = `${tile.name} · ${count} photograph${count === 1 ? '' : 's'}${tile.bandcamp ? ` · ${tile.bandcamp.label}` : ''}`
 
@@ -829,7 +835,10 @@ function renderArtistStrip() {
     appendTileLabel(button, tile.name, count)
     button.addEventListener('pointerenter', () => prefetchBandcamp(tile.name))
     button.addEventListener('focus', () => prefetchBandcamp(tile.name))
-    button.addEventListener('click', () => toggleArtist(tile))
+    button.addEventListener('click', (event) => {
+      event.preventDefault()
+      toggleArtist(tile)
+    })
     dom.artists.append(button)
   }
 
@@ -886,6 +895,22 @@ function updateArtistStrip() {
   }
 }
 
+function artistRouteBase() {
+  const event = currentEvent()
+  return event ? slugify(event.name) : (state.eventGroup || '')
+}
+
+function artistHref(name) {
+  const base = artistRouteBase()
+  return base ? `/${base}/${slugify(name)}/` : ''
+}
+
+function updateArtistRoute() {
+  const base = artistRouteBase()
+  if (!base) return
+  replaceRoute(state.filter ? `/${base}/${slugify(state.filter)}/` : `/${base}/`)
+}
+
 function toggleArtist(tile) {
   if (state.filter === tile.name) setFilter('')
   else setFilter(tile.name, tile.cover.src)
@@ -897,6 +922,7 @@ function showAllArtists() {
   updateChrome()
   buildSlideshow({ index: 0 })
   syncBandcamp()
+  updateArtistRoute()
 }
 
 function selectBestOf(id = null, { updateRoute = true } = {}) {
@@ -932,7 +958,11 @@ function selectDefaultPortfolio() {
 }
 
 function applyRouteFromPath() {
-  const segment = location.pathname.split('/').filter(Boolean)[0] || ''
+  const segments = location.pathname.split('/').filter(Boolean)
+  const segment = segments[0] || ''
+  const artistSegment = segments[1]
+    ? slugify(decodeURIComponent(segments[1]).replace(/\.html$/i, ''))
+    : ''
   const slug = slugify(decodeURIComponent(segment).replace(/\.html$/i, ''))
   if (!slug || slug === 'index') return selectDefaultPortfolio()
 
@@ -954,12 +984,26 @@ function applyRouteFromPath() {
   })
   if (event) {
     selectEvent(event.id)
+    if (artistSegment) {
+      const artist = (event.artists || []).find((name) => slugify(name.name || name) === artistSegment)
+      if (artist) setFilter(artist.name)
+    }
     return true
   }
 
   const groups = [...new Set(state.events.map((item) => eventGroupKey(item.id)).filter(Boolean))]
   if (groups.includes(slug)) {
     selectEventGroup(slug)
+    if (artistSegment) {
+      const artists = [...new Set(
+        state.all
+          .filter((item) => eventGroupKey(item.eventId) === slug)
+          .map((item) => item.artist)
+          .filter(Boolean)
+      )]
+      const artist = artists.find((name) => slugify(name) === artistSegment)
+      if (artist) setFilter(artist)
+    }
     return true
   }
 
@@ -986,6 +1030,7 @@ function setFilter(name, startSrc = null) {
   updateChrome()
   syncBandcamp()
   buildSlideshow()
+  updateArtistRoute()
 }
 
 /* --------------------------------------------------------------------------
