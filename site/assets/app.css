@@ -901,6 +901,16 @@ code {
     letter-spacing: 0.015em;
   }
 
+  .topbar-left {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .topbar-left .caption {
+    flex: 1 0 100%;
+    width: 100%;
+  }
+
   .caption-artist {
     font-size: 2rem;
   }
