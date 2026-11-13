@@ -249,12 +249,13 @@ body.is-ready .ui {
   flex: 0 1 auto;
   width: auto;
   max-width: 100%;
+  margin-right: 3px;
   color: var(--film-edge);
   font-family: var(--display);
-  font-size: clamp(14px, 1.2vw, 18px);
+  font-size: clamp(11px, 0.9vw, 14px);
   font-weight: 500;
   letter-spacing: 0.02em;
-  line-height: 0.95;
+  line-height: 1.2;
   text-align: left;
   text-decoration: none;
   text-transform: uppercase;
@@ -263,6 +264,10 @@ body.is-ready .ui {
 .brand span {
   display: block;
   white-space: nowrap;
+}
+
+.brand span + span {
+  margin-top: -1px;
 }
 
 .brand:hover,
@@ -287,20 +292,21 @@ body.is-ready .ui {
 .events-control {
   position: relative;
   flex: none;
-  width: 42px;
+  width: 25px;
   max-width: none;
-  margin: 0;
+  margin: 0 -4px 0 0;
   pointer-events: auto;
 }
 
 .topbar .events-toggle {
-  width: 42px;
-  height: 42px;
+  width: 25px;
+  height: 30px;
   padding: 0;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0;
   border: 0;
   background: transparent;
+  box-shadow: none;
   color: var(--film-edge);
 }
 
@@ -308,6 +314,17 @@ body.is-ready .ui {
   width: 18px;
   height: 18px;
   stroke-width: 1.6;
+}
+
+.topbar .events-toggle:hover,
+.topbar .events-toggle:focus {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.topbar .events-toggle:hover {
+  color: var(--accent);
 }
 
 .topbar .events-toggle[aria-expanded="true"] {
@@ -483,10 +500,6 @@ body.is-ready .ui {
 
 .event-item-bestof + .event-item-link {
   text-decoration: none;
-}
-
-.event-item {
-  border-top: 1px solid rgba(233, 180, 76, 0.18);
 }
 
 .event-item[aria-current="true"] .event-count {
@@ -913,8 +926,12 @@ code {
     gap: 7px;
   }
 
+  .events-control {
+    margin-right: -2px;
+  }
+
   .brand {
-    font-size: 12px;
+    font-size: 11px;
     letter-spacing: 0.015em;
   }
 
