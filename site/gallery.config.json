@@ -100,6 +100,18 @@
       "height": 42,
       "page": "https://rivalconsoles.bandcamp.com/track/if-not-now",
       "homepage": "https://rivalconsoles.bandcamp.com/"
+    },
+    "Kelly Moran": {
+      "embed": "https://bandcamp.com/EmbeddedPlayer/track=355178764/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
+      "height": 42,
+      "page": "https://kellymoran.bandcamp.com/track/echo-in-the-field",
+      "homepage": "https://kellymoran.bandcamp.com/"
+    },
+    "Jules Reidy": {
+      "embed": "https://bandcamp.com/EmbeddedPlayer/track=3374350240/size=small/bgcol=333333/linkcol=e99708/transparent=true/",
+      "height": 42,
+      "page": "https://julesreidy.bandcamp.com/track/every-day-theres-a-sunset",
+      "homepage": "https://julesreidy.bandcamp.com/"
     }
   }
 }
